@@ -1,4 +1,4 @@
-// This code uses PWM to control the color of an RGB LED
+// This code uses PWM to control the color of an RGB LED for a Gradient Color
 
 
 const byte ledPins[] = {4, 2, 15}; // define red gree and blue pins
@@ -11,15 +11,29 @@ void setup() {
 }
 
 void loop() {
-  red = random(0, 256);
-  green = random(0, 256);
-  blue = random(0, 256);
-  setColor(red, green, blue);
-  delay(200);
+  for (int i = 0; i < 256; i++){
+    setColor(wheel(i));
+    delay(20);
+  }
+
 }
 
-void setColor(byte r, byte g, byte b){
-  ledcWrite(ledPins[0], 255 - r); 
-  ledcWrite(ledPins[1], 255 - g);
-  ledcWrite(ledPins[2], 255 - b);
+void setColor(long rgb){
+  ledcWrite(ledPins[0], 255 - (rgb >> 16) & 0xFF); 
+  ledcWrite(ledPins[1], 255 - (rgb >> 8) & 0xFF);
+  ledcWrite(ledPins[2], 255 - (rgb >> 0) & 0xFF);
+}
+
+long wheel(int pos){
+  long WheelPos = pos % 0xff;
+  if (WheelPos < 85) {
+    return ((255 - WheelPos * 3) << 16 | ((WheelPos * 3) << 8)); // red to green
+  } else if (WheelPos < 170){
+    WheelPos -= 85;
+    return (((255 - WheelPos * 3) << 8) | (WheelPos * 3)); // green to blue
+  }else{
+    WheelPos -= 170;
+    return ((WheelPos * 3) << 16 | (255 - WheelPos * 3)); // blue to red
+  }
+  
 }
