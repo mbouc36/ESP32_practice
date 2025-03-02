@@ -1,31 +1,41 @@
-#define PIN_BUZZER 13
-#define PIN_BUTTON 4
-#define CHN        0 //define PWM channel
-
+#define BUZZER_PIN     13
+#define PIN_BUTTON     4
+hw_timer_t * timer = NULL;
+bool isAlerting = false;
+void IRAM_ATTR onTimer() {
+  digitalWrite(BUZZER_PIN, ! digitalRead(BUZZER_PIN));
+}
 void setup() {
-  pinMode(PIN_BUTTON, INPUT);
-
-  //PWM config
-  ledcAttachChannel(PIN_BUZZER, 1, 10, CHN); //attach led pin to PWM channel
-  ledcWriteTone(PIN_BUZZER, 2000); // sound at 2kHz for 0.3s, this function generates a square wave with duty cycle 50%
-  delay(300);
+pinMode(PIN_BUTTON, INPUT);
+pinMode(BUZZER_PIN, OUTPUT);
+// Set the timer frequency to 1MHz.(see ESP32 Technical Reference Manual for more info). timer = timerBegin(1000000);
+// Attach onTimer function to our timer.
+timerAttachInterrupt(timer, &onTimer);
 }
-
 void loop() {
-  if (digitalRead(PIN_BUTTON) == LOW){
-    alert();
-  } else{
-    ledcWriteTone(PIN_BUZZER, 0);
-  } 
+  if (digitalRead(PIN_BUTTON) == LOW) {
+    if (!isAlerting) {
+      isAlerting = true;
+      // Set alarm, 1ms, repeat, auto-reload value.
+      timerAlarm(timer, 1000, true, 0);
+      // Start an alarm
+      timerStart(timer);
 }
-
-void alert(){
-  float sinVal; //variable to store sine value
-  int toneVal; // variable to store sound frequency
-  for (int x = 0; x < 360; x += 10){ //x from 0 -> 360 degrees
-    sinVal = sin(x * (PI / 100));
+    alert();
+  } else {
+    if (isAlerting) {
+      isAlerting = false;
+      timerStop(timer);
+      digitalWrite(BUZZER_PIN, LOW);
+} }
+}
+void alert() {
+  float sinVal;
+  int toneVal;
+  for (int x = 0; x < 360; x += 1) {
+    sinVal = sin(x * (PI / 180));
     toneVal = 2000 + sinVal * 500;
-    ledcWriteTone(PIN_BUZZER, toneVal);
-    delay(10);
+    timerAlarm(timer, 500000 / toneVal, true, 0);
+    delay(1); 
   }
 }
