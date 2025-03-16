@@ -3,19 +3,12 @@ bool stringComplete = false; // whether the string complete
 
 void setup(){
   Serial.begin(115200); //begin and set baude rate 
-  Serial.println(String(\n"ESP32 initilization Completed! \n")) ;
+  Serial.println(String("\nESP32 initilization Completed! \n")
+                        + String("Please input some characters, \n")
+                        + String("select \"Newline\" below and click send button \n"));
 }
 
-void loop(){
-  Serial.printf("Running time: %.1f s\n", millis() / 1000.0f);
-  delay(1000);
-}
 
-String inputString = ""; //a String to hold incoming data bool stringComplete = false; // whether the string is complete
-void setup() {
-  Serial.begin(115200);
-  Serial.println(String("\nESP32 initialization completed! \n")
-}
 void loop() {
   if (Serial.available()) {
     char inChar = Serial.read();
@@ -25,10 +18,8 @@ void loop() {
     }
   }
   if (stringComplete) {
-// judge whether data has been received
-     // read one character
-
-  inputString = "";
-  stringComplete = false;
+    Serial.printf("inputString: %s \n", inputString);
+    inputString = "";
+    stringComplete = false;
 }
 }
