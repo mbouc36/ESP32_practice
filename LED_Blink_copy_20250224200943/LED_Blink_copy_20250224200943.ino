@@ -1,31 +1,14 @@
-#define PIN_LED 2
-#define PRESS_VAL 14
-#define RELEASE_VAL 25
+#define PIN_ANALOG_IN 4
+#define PIN_LED 25
+#define CHAN 0
 
-bool isProcessed = false;
 void setup() {
-  Serial.begin(115200);
-  pinMode(PIN_LED, OUTPUT);
+  ledcAttachChannel(PIN_LED, 1000, 12, CHAN);
 }
 
 void loop(){
-  if (touchRead(T0) < PRESS_VAL){
-    if (!isProcessed){
-      isProcessed = true; //avoid multiple detections
-      Serial.println("Touch detected! ");
-      reverseGPIO(PIN_LED);
-    }
-  }
-  
-  if (touchRead(T0) > RELEASE_VAL){
-    if (isProcessed){
-      isProcessed = false;
-      Serial.println("Released! ");
-    }
-  }
-}
-
-
-void reverseGPIO(int pin){
-  digitalWrite(pin, !digitalRead(pin));
+  int adcVal = analogRead(PIN_ANALOG_IN); //read adc value
+  int pwmVal = adcVal;                    //adcVal re-map to pwmVal
+  ledcWrite(PIN_LED, pwmVal);
+  delay(10);
 }
