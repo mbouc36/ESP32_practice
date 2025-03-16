@@ -1,25 +1,15 @@
-String inputString = ""; // a String to hold incoming data
-bool stringComplete = false; // whether the string complete
+#define PIN_ANALOG_IN 4
 
-void setup(){
-  Serial.begin(115200); //begin and set baude rate 
-  Serial.println(String("\nESP32 initilization Completed! \n")
-                        + String("Please input some characters, \n")
-                        + String("select \"Newline\" below and click send button \n"));
+
+void setup() {
+  Serial.begin(115200);
 }
 
-
-void loop() {
-  if (Serial.available()) {
-    char inChar = Serial.read();
-    inputString += inChar;
-    if (inChar == '\n') {
-      stringComplete = true;
-    }
-  }
-  if (stringComplete) {
-    Serial.printf("inputString: %s \n", inputString);
-    inputString = "";
-    stringComplete = false;
-}
+void loop(){
+  int adcVal = analogRead(PIN_ANALOG_IN);
+  int dacVal = map(adcVal, 0, 4095, 0, 255); // converts range of 0-4095 to range of 0 to 255
+  double voltage = adcVal /4095.0 * 3.3;
+  dacWrite(DAC1, dacVal);
+  Serial.printf("ADC Val: %d, \t DAC Val: %d, \t Voltage: %.2fV\n", adcVal, dacVal, voltage);
+  delay(200);
 }
